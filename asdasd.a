@@ -1,0 +1,39 @@
+<script setup>
+import useStore from "./stores/auth";
+import Message from "./components/Message.vue";
+import Content from './components/Content.vue';
+import useDialogStore from "./stores/dialog";
+import { ref,onMounted,onBeforeUpdate } from "vue";
+import "./assets/base.css";
+
+const main = useStore();
+
+const message = ref("");
+
+const dialog = useDialogStore();
+main.getUser();
+main.getUsers();
+
+</script>
+
+<template>
+  <main class="body">
+    <div v-if="main.users?.data !== undefined">
+      <Message
+        :user="main.userData.data"
+        :users="
+          main.users.data?.filter((item) => item.id != main.userData?.data?.id)
+        "
+      ></Message>
+    </div>
+
+       <Content v-if="dialog.activeDialog != null"></Content>   
+  </main>
+</template>
+
+<style scoped>
+.body {
+  display: flex;
+  position: relative;
+}
+</style>
