@@ -1,6 +1,8 @@
-from rest_framework.serializers import ModelSerializer
+from urllib import request
+from rest_framework.serializers import ModelSerializer,SerializerMethodField
 from .models import Dialog, Message
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 class UserSerializer(ModelSerializer):
@@ -33,7 +35,7 @@ class MessageCreateSerializer(ModelSerializer):
     class Meta:
         model = Message
         read_only_fields = ('sender',)
-        fields = ('text','dialog','sender')
+        fields = ('id','text','dialog','sender','created_at','read')
 
 
 

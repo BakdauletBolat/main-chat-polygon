@@ -1,17 +1,25 @@
 from email import message
+
+from django.dispatch import receiver
 from .models import Message
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .serializers import MessageSerializer
+from asgiref.sync import async_to_sync
+
+
+from channels.layers import get_channel_layer
+
+
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+
     async def connect(self):
-        # print(self.scope)
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'chat_%s' % self.room_name
-
+    
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -36,31 +44,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    @database_sync_to_async
-    def create_message(self,text,sender):
-        return Message.objects.create(
-            dialog_id=self.room_name,
-            text=text,
-            sender_id=sender
-        )
-
+ 
     # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        print(text_data_json)
-        message = text_data_json['message']
-        sender_id = text_data_json['sender_id']
+        message = text_data_json["message"]
 
-        messageObj = await self.create_message(message,sender_id)
-        serMessage = MessageSerializer(messageObj)
-        # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': serMessage.data
+                'message': message
             }
         )
+    
 
     async def connected(self,event):
         message = event['message']
@@ -77,4 +74,54 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'message': message,
             'type': 'message'
+        }))
+
+
+class GetNotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        # print(self.scope)
+        self.user_id = self.scope['user'].id
+        self.room_group_name = 'notifications_%s' % self.user_id
+
+        print('connected ',self.room_group_name)
+        print(self.channel_layer_alias)
+
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    
+    async def disconnect(self, close_code):
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json['message']
+        receiver_id = text_data_json['receiver_id']
+        self.notifcation_receiver_name = 'notifications_%s' % receiver_id
+
+        print('send_to',self.notifcation_receiver_name)
+
+        await self.channel_layer.group_send(
+            self.notifcation_receiver_name,
+            {
+                'type': 'new_message',
+                'message': message
+            }
+        )
+
+    async def new_message(self, event):
+        message = event['message']
+        print('new_message')
+        await self.send(text_data=json.dumps({
+            'message': message,
+            'type': 'new_message'
         }))

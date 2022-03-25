@@ -17,7 +17,7 @@ class Message(models.Model):
                                on_delete=models.CASCADE)
     text = models.TextField(verbose_name="Message text")
     read = models.BooleanField(verbose_name="Read", default=False)
-    # created_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True,blank=True)
  
 
     def __str__(self):

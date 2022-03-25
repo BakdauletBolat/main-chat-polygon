@@ -11,6 +11,11 @@ const Messages = observer(() =>{
         endMessageRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
+    const getActiveDialogById = (id) => {
+        const index = userStore.dialogs?.findIndex(item=>item.id == id);
+        return userStore.dialogs[index];
+    }
+
     scrollToBottom();
 
     console.log('scrolled');
@@ -18,7 +23,7 @@ const Messages = observer(() =>{
     const currentUserId = userStore.user.id;
     return (
         <>
-         {userStore.activeDialog?.messages.map((item)=>(
+         {getActiveDialogById(userStore.activeDialog).messages.map((item)=>(
             <div key={item.id} className={currentUserId == item.sender ? 'justify-right': ''} style={{
                 padding: 5,
                 display:'flex'
@@ -29,7 +34,7 @@ const Messages = observer(() =>{
                 display:'flex',
                 borderRadius:5
             }}>
-                <div >{item.text}</div>
+                <div >{item.text} {item.created_at}</div>
                
             </div>
             </div>     

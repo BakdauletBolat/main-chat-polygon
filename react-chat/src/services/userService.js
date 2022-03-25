@@ -30,6 +30,38 @@ class UserService {
         }    
     }
 
+    async createMessage(body) {
+        const token = "Bearer " +localStorage.getItem('userToken');
+        const headers = {
+            'Authorization': token
+        }
+
+        try {
+           return await axios.post(`${this.url}/create-message/`,body,{
+               headers: headers
+           });
+        }
+        catch (e) {
+            console.log(e,'err');
+        } 
+    }
+
+    async getDialogs() {
+        const token = "Bearer " +localStorage.getItem('userToken');
+        const headers = {
+            'Authorization': token
+        }
+
+        try {
+           return await axios.get(`${this.url}/dialogs/`,{
+               headers: headers
+           });
+        }
+        catch (e) {
+            console.log(e,'err');
+        } 
+    }
+
     async getUsers() {
         const token = "Bearer " +localStorage.getItem('userToken');
         const headers = {
@@ -50,14 +82,14 @@ class UserService {
         localStorage.removeItem('userToken');
     }
 
-    async getActiveDialog(name) {
+    async getActiveDialog(id) {
         const token = "Bearer " +localStorage.getItem('userToken');
         const headers = {
             'Authorization': token
         }
 
         try {
-           return await axios.get(`${this.url}/${name}/`,{
+           return await axios.get(`${this.url}/dialog/${id}/`,{
                headers: headers
            });
         }

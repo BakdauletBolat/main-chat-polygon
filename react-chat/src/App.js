@@ -52,6 +52,19 @@ function App() {
 
   }
 
+  if (userStore.notificationSocket !== undefined ) {
+    userStore.notificationSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const message = data.message;
+      console.log(message,'not');
+      if (data.type == 'new_message') {
+        if (message.sender !== userStore.user.id && userStore.activeDialog !== message.dialog) {
+          userStore.pushActiveMessages(message);
+        }  
+      }  
+    }
+  }
+
 
 
   useEffect(() => {

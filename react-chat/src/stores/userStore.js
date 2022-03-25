@@ -1,23 +1,27 @@
 import {makeAutoObservable} from 'mobx';
 
+
 class ObservableUserStore {
 
     users = [];
     user = undefined;
     activeDialog = undefined;
     activeMessages = [];
-    socket = undefined;
-    mainSocket = undefined;
     friend = undefined;
+    socket = undefined;
+    dialogs = [];
+
+    notificationSocket = new WebSocket(`ws://172.20.10.3:8000/ws/notifications/?token=${localStorage.getItem('userToken')}`);
   
     constructor() {
         makeAutoObservable(this);
     }
 
-
-    setMainSocket(socket) {
-      this.mainSocket = socket;
+    setDialogById = (dialog) => {
+      const index = this.dialogs?.findIndex(item=>item.id == dialog.id);
+      this.dialogs[index] = dialog;
     }
+    
 
     setSocket(socket) {
       this.socket = socket;
@@ -29,6 +33,10 @@ class ObservableUserStore {
 
     setUsers(users) {
       this.users = users;
+    }
+
+    setDialogs(dialogs) {
+      this.dialogs = dialogs;
     }
 
     deleteUser() {
@@ -47,12 +55,18 @@ class ObservableUserStore {
       this.activeMessages = messages;
     }
 
+    setNotifcationSocket(socket) {
+      this.notificationSocket = socket;
+    }
+
     pushActiveMessages(message) {
-      console.log(message);
-      this.activeDialog.messages.push(message);
+      const id = message.dialog;
+      const idItem =  this.dialogs.findIndex((item)=>item.id == id);
+      this.dialogs[idItem].messages.push(message);
     }
     
   }
+
   
   export default new ObservableUserStore();
                           
