@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 class UserService {
-    url = 'http://172.20.10.3:8000/chat'
+    url = 'http://192.168.18.14:8000/chat'
 
     async login(data) {
         try {
